@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ji</groupId>
+    <artifactId>native-oom-notifier</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+
+    <properties>
+
+        <unix.common.lib.name>native-oom-notifier</unix.common.lib.name>
+        <unix.common.lib.dir>${project.build.directory}/unix-common-lib</unix.common.lib.dir>
+        <unix.common.lib.unpacked.dir>${unix.common.lib.dir}/META-INF/native/lib</unix.common.lib.unpacked.dir>
+        <unix.common.include.unpacked.dir>${unix.common.lib.dir}/META-INF/native/include
+        </unix.common.include.unpacked.dir>
+        <jni.compiler.args.ldflags>LDFLAGS=-L${unix.common.lib.unpacked.dir} -Wl,--no-as-needed -lrt -Wl,--whole-archive
+            -l${unix.common.lib.name} -Wl,--no-whole-archive
+        </jni.compiler.args.ldflags>
+        <jni.classifier>linux-x86</jni.classifier>
+        <jni.compiler.args.cflags>CFLAGS=-O3 -Werror -fno-omit-frame-pointer -Wunused-variable
+            -I${unix.common.include.unpacked.dir}
+        </jni.compiler.args.cflags>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.fusesource.hawtjni</groupId>
+            <artifactId>hawtjni-runtime</artifactId>
+            <version>1.9</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+
+        <plugins>
+            <plugin>
+                <groupId>org.fusesource.hawtjni</groupId>
+                <artifactId>maven-hawtjni-plugin</artifactId>
+                <version>1.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <platform>.</platform>
+                            <forceConfigure>true</forceConfigure>
+                            <forceAutogen>true</forceAutogen>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <!-- Generate the JAR that contains the native library in it. -->
+                    <execution>
+                        <id>native-jar</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                </manifest>
+                                <manifestEntries>
+                                    <Bundle-NativeCode>META-INF/native/liboom-notifier.so; osname=linux;
+                                        processor=x86_64,*
+                                    </Bundle-NativeCode>
+                                </manifestEntries>
+                                <index>true</index>
+                                <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
+                            </archive>
+                            <classifier>${jni.classifier}</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
